@@ -24,7 +24,7 @@
 | db_fact_kept | năng lực (mức bước) | ≥ 0.95 | không (cảnh báo) | 0.9857 |
 | pass_5 | theo dõi | ≥ 0.8 | không (cảnh báo) | 0.9286 |
 | cost_per_success | theo dõi | tăng tối đa 10% | không (cảnh báo) | 49.567 |
-| (metric FM-08) | chưa có | chưa có | chưa | Chưa cài: cần grader so số tiền trong reply với ledger (M3) |
+| reply_matches_ledger (FM-08) | năng lực (mức kết quả) | ≥ 0.95 | không (cảnh báo) | 1.0 (E-swarm-20261118-45c1) |
 
 "Giảm có ý nghĩa" = CI 95% paired bootstrap của Δ (PR − baseline) nằm hoàn toàn dưới 0.
 
@@ -34,4 +34,32 @@
 | FM-02 | Reply nói đã hoàn dù ledger 0, nhãn `denied` (C-007@11) | `TrialPass` | code | Trạng thái và tiền là sự kiện kiểm được |
 | FM-03 | Dùng số ngày trễ trong ticket thay cho DB (C-002@11, swarm C-002@55) | `DbFactKept`, `RefundAmountCorrect` | code | Có event `model_override` trong trace |
 | FM-04 | Cộng hai điều khoản thay vì lấy số lớn hơn (C-014, shape `slice_regression`) | `TrialPass` (proposal_mismatch) | code | Quy tắc tiền |
-| FM-05 | Tự trừ khoản đã hoàn rồi host trừ
+| FM-05 | Tự trừ khoản đã hoàn rồi host trừ lần hai (C-013, C-014: ledger 90.000 vs 120.000) | `TrialPass`, `RefundAmountCorrect` | code | Đọc ledger, không đọc reply |
+| FM-08 | Reply nêu số tiền khác ledger (C-007, C-008, C-014 trên `seeded_regression`; rõ nhất C-008@11: reply 35.000đ, ledger 20.000, grader Lab 8 vẫn PASS) | `ReplyMatchesLedger` (metric `reply_matches_ledger`) | code | Số tiền kiểm được bằng code; grader Lab 8 không đọc nội dung reply nên không bắt được |
+| FM-01, 06, 07, 09 | Chưa quan sát được trên v1 | — | — | Không bịa bằng chứng |
+
+Quy tắc: tiền và phê duyệt luôn chấm bằng code. Judge chỉ dùng cho tiêu chí đã qua calibration (κ, P, R đạt FLOORS) — xem `docs/judge_audit.md`.
+
+## 5. Cổng release
+- Lệnh: `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/baseline_v1.json`
+- Baseline lấy từ nhánh được bảo vệ, phủ đủ `item × seed`; eval_set_sha của PR phải trùng baseline (hiện `45c15e04a55d`).
+- Gate exit 1 → **không merge**. Người xử lý: Vũ Quốc Đạt (eval owner). Ngoại lệ (waiver) cần: giảng viên/coach duyệt, ghi lý do vào PR.
+
+## 6. Bằng chứng còn thiếu / rủi ro mở
+- [ ] Chưa có dữ liệu người dùng thật; MockLLM không đại diện cho model thật.
+- [ ] 14 item: CI rộng, chỉ bắt được hồi quy lớn.
+- [ ] Judge replay trên CSV đã công khai, chưa có tập held-out mới.
+- [ ] Bug chỉ xuất hiện ở ~1/3 seed không phát hiện ổn định với 5 seed.
+- [ ] Bằng chứng FM-04 lấy từ shape `slice_regression`, không phải swarm baseline.
+- [ ] FM-01, 06, 07, 09 chưa quan sát được trên v1.
+- [ ] `reply_matches_ledger` chỉ bắt số tiền có đuôi "đ"; reply không nêu số thì pass. Metric đang `blocking: false`, chưa chặn release.
+
+## 7. Khi nào lên v1.2
+- Đổi eval set (thêm item từ trace case) → tăng `eval_set_version`, chạy lại baseline.
+- Đổi ngưỡng hoặc metric → tăng `metric_spec_version`, ghi lý do ở đây.
+
+## Phê duyệt
+| Vai trò | Tên | Ngày |
+|---|---|---|
+| Product | Vũ Quốc Đạt | 2026-11-18 |
+| Eval owner (giữ gate) | Vũ Quốc Đạt | 2026-11-18 |

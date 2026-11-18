@@ -1,14 +1,30 @@
-# Failure taxonomy v1 (bạn điền)
-| ID | Tên | Định nghĩa (1 câu) | Layer | Bằng chứng (claim@seed / trace) | Grader | Metric |
-|---|---|---|---|---|---|---|
-| FM-01 | leaky_trace — secret lộ trong trace | | | | | |
-| FM-02 | ignore_denied — bỏ qua approval bị từ chối | | | | | |
-| FM-03 | ticket_trust — tin ticket hơn DB | | | | | |
-| FM-04 | sum_parts / round_down — cộng/làm tròn sai | | | | | |
-| FM-05 | pre_deducted — trừ trước khi được duyệt | | | | | |
-| FM-06 | stale_clause — dùng điều khoản cũ | | | | | |
-| FM-07 | sibling_refund — hoàn tiền nhầm claim anh em | | | | | |
-| FM-08 | misreport — reply nói số tiền khác ledger | | | | | |
-| FM-09 | cross_principal — lẫn dữ liệu giữa principal (v2) | | | | | |
-Mã và tên ngắn cố định (dùng trong `failure_modes` của eval set); bạn tự viết định nghĩa, bằng chứng, grader và metric.
-Quy tắc: mỗi FM phải quan sát được trên trace, không phải phỏng đoán. Tiền và approval luôn chấm bằng code.
+# Trace case: từ trace tới quyết định sai đầu tiên
+
+Một trace case trả lời một câu: **bước nào là bước sai đầu tiên**, và test nào sẽ bắt được nó lần sau.
+
+```bash
+cd src
+python -m lab9.trace_case --shape seeded_regression --claim C-002 --seed 11
+python -m lab9.trace_case --shape fixed --claim C-002 --seed 11   # đối chứng
+```
+
+Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_override`, `error` …), ledger so với nhãn, và lý do của grader Lab 8.
+
+## Mẫu điền (mỗi bạn 1 case, lấy từ trial đang fail trong report)
+
+| Trường | Nội dung |
+|---|---|
+| Trial | `<shape> <claim>@<seed>`, run ID trong report |
+| Triệu chứng | Grader nào fail; reply nói gì so với ledger ghi gì |
+| Bước sai đầu tiên | Số thứ tự event + kind + trích payload (≤1 dòng) |
+| Vì sao là bước *đầu tiên* | Các bước trước đó đúng ra sao (dẫn số event) |
+| Failure mode | Mã FM-xx trong `docs/failure_taxonomy.md` |
+| Đối chứng | Cùng claim@seed trên shape `fixed`: bước đó khác thế nào |
+| Regression test | Tên test + grader/assert nào bắt được; đã thấy fail trên variant lỗi và pass trên `fixed` chưa |
+| Chưa chắc chắn | Điều trace không chứng minh được |
+
+## Quy tắc
+
+- Đọc **ledger trước reply**: reply trôi chảy vẫn có thể đi kèm một khoản hoàn sai.
+- "Bước sai đầu tiên" phải dẫn số event cụ thể, không phải "agent bị nhầm".
+- Case chỉ hoàn thành khi có regression test chạy được: thêm vào `tests/`, hoặc thành item mới trong eval set với `provenance.from_trace`.

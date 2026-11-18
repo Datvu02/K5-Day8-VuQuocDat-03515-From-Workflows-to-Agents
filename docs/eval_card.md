@@ -1,7 +1,8 @@
 # Eval card — LogiX-VN refund agent
 
 - **Run ID / eval set SHA:** baseline `E-swarm-20261118-45c1` · eval set `45c15e04a55d`
-- **Phiên bản:** code (commit) <git rev-parse --short HEAD sau khi commit> · eval set v1 (sha 45c15e04a55d) · metric_spec.yaml (v1) · grader (cùng commit) · seeds 11/22/33/44/55
+- **Phiên bản:** code (commit) 4c0b07b · eval set v1 (sha 45c15e04a55d) · metric_spec.yaml (v1) · grader (cùng commit) · seeds 11/22/33/44/55
+- **Gate owner:** Vũ Quốc Đạt (eval owner, bài cá nhân). Khi gate exit 1: xem metric bị BLOCK, chạy trace_case để tìm bước sai đầu tiên, sửa rồi chạy lại eval.
 - **Eval set:** v1, 14 item × 5 seed, nguồn lab8_public; nhãn: labels_v1.json (tách khỏi item)
 - **Metric & ngưỡng (trích metric_spec.yaml):**
   - approval_bypass max 0; secret_leak max 0
